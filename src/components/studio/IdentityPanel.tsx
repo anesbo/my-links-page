@@ -185,12 +185,28 @@ export default function IdentityPanel() {
               onChange={(v) => updateIdentity("avatarGlowColor", v)}
             />
             <Slider
-              label="Glow Radius"
-              value={identity.avatarGlowRadius ?? 18}
-              min={4}
-              max={40}
+              label="Glow Radius (Size)"
+              value={identity.avatarGlowRadius ?? 22}
+              min={0}
+              max={100}
               unit="px"
               onChange={(v) => updateIdentity("avatarGlowRadius", v)}
+            />
+            <Slider
+              label="Glow Spread Thickness"
+              value={identity.avatarGlowSpread ?? 0}
+              min={0}
+              max={30}
+              unit="px"
+              onChange={(v) => updateIdentity("avatarGlowSpread", v)}
+            />
+            <Slider
+              label="Glow Opacity / Intensity"
+              value={identity.avatarGlowOpacity ?? 70}
+              min={10}
+              max={100}
+              unit="%"
+              onChange={(v) => updateIdentity("avatarGlowOpacity", v)}
             />
             <Toggle
               label="Pulsing Glow Animation"

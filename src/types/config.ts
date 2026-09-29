@@ -88,6 +88,8 @@ export type HoverEffect = "lift" | "scale" | "glow" | "shake" | "shine";
 
 export type LinkShadow = "none" | "subtle" | "glow" | "elevated" | "heavy";
 
+export type GlowMode = "always" | "hover" | "both";
+
 export interface LinkStyle {
   cornerRadius: number; // 0 to 9999
   borderWidth: number;
@@ -104,6 +106,14 @@ export interface LinkStyle {
   shadow: LinkShadow;
   liquidGlassGleam?: boolean;
   badgeStyle?: "pill" | "solid" | "glow" | "outline";
+  // Capsule Glow customization
+  glowEnabled?: boolean;
+  glowColor?: string;
+  glowRadius?: number; // 0 to 100 px ("too much or little")
+  glowSpread?: number; // 0 to 30 px
+  glowOpacity?: number; // 0 to 100%
+  glowMode?: GlowMode; // "always" | "hover" | "both"
+  glowPulse?: boolean;
 }
 
 export type LucideIconName = string;
@@ -145,7 +155,9 @@ export interface IdentityConfig {
   avatarBorderStyle: AvatarBorderStyle;
   avatarGlow: boolean;
   avatarGlowColor: string;
-  avatarGlowRadius: number; // 0 to 40
+  avatarGlowRadius: number; // 0 to 100 px
+  avatarGlowSpread?: number; // 0 to 30 px
+  avatarGlowOpacity?: number; // 0 to 100%
   avatarGlowPulse: boolean;
 }
 

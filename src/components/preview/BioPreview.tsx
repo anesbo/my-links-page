@@ -6,6 +6,18 @@ import { getLinkIcon, SOCIAL_ICONS } from "@/lib/icons";
 import { BadgeCheck, MousePointerClick, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 
+function hexToRgba(hex: string, alphaPercent: number = 100): string {
+  if (!hex) return `rgba(139, 92, 246, ${(alphaPercent / 100).toFixed(2)})`;
+  let clean = hex.replace("#", "");
+  if (clean.length === 3) {
+    clean = clean.split("").map((c) => c + c).join("");
+  }
+  const r = parseInt(clean.substring(0, 2), 16) || 0;
+  const g = parseInt(clean.substring(2, 4), 16) || 0;
+  const b = parseInt(clean.substring(4, 6), 16) || 0;
+  return `rgba(${r}, ${g}, ${b}, ${(alphaPercent / 100).toFixed(2)})`;
+}
+
 interface BioPreviewProps {
   config: BioConfig;
   interactive?: boolean;
@@ -42,7 +54,7 @@ export default function BioPreview({ config, interactive = false }: BioPreviewPr
         base.boxShadow = "0 20px 35px -8px rgba(0,0,0,0.5)";
         break;
       case "glow":
-        base.boxShadow = `0 0 20px ${linkStyle.borderColor || "rgba(139,92,246,0.3)"}`;
+        base.boxShadow = `0 0 ${linkStyle.glowRadius ?? 20}px ${linkStyle.glowColor || "rgba(139,92,246,0.35)"}`;
         break;
       case "none":
       default:
@@ -104,6 +116,26 @@ export default function BioPreview({ config, interactive = false }: BioPreviewPr
         break;
     }
 
+    // Custom Capsule Glow Calculation
+    if (linkStyle.glowEnabled !== false) {
+      const gRadius = linkStyle.glowRadius ?? 20;
+      const gSpread = linkStyle.glowSpread ?? 0;
+      const gOpacity = linkStyle.glowOpacity ?? 55;
+      const gColor = hexToRgba(linkStyle.glowColor || "#8b5cf6", gOpacity);
+      const glowShadow = `0 0 ${gRadius}px ${gSpread}px ${gColor}`;
+
+      if (
+        linkStyle.glowMode === "always" ||
+        linkStyle.glowMode === "both" ||
+        !linkStyle.glowMode
+      ) {
+        base.boxShadow =
+          base.boxShadow && base.boxShadow !== "none"
+            ? `${base.boxShadow}, ${glowShadow}`
+            : glowShadow;
+      }
+    }
+
     return base;
   }
 
@@ -114,7 +146,7 @@ export default function BioPreview({ config, interactive = false }: BioPreviewPr
       case "scale":
         return "hover:scale-[1.03]";
       case "glow":
-        return "hover:shadow-lg hover:shadow-purple-500/30";
+        return "hover:-translate-y-1";
       case "shake":
         return "hover:animate-[wiggle_0.3s_ease-in-out]";
       case "shine":
@@ -346,9 +378,16 @@ export default function BioPreview({ config, interactive = false }: BioPreviewPr
     borderStyle: identity.avatarBorderStyle || "solid",
   };
 
+  const avatarGlowColor = hexToRgba(
+    identity.avatarGlowColor || "#8b5cf6",
+    identity.avatarGlowOpacity ?? 70
+  );
+  const avatarGlowRadius = identity.avatarGlowRadius ?? 22;
+  const avatarGlowSpread = identity.avatarGlowSpread ?? 0;
+
   const avatarGlowStyle: React.CSSProperties = identity.avatarGlow
     ? {
-        boxShadow: `0 0 ${identity.avatarGlowRadius ?? 18}px ${identity.avatarGlowColor || "#8b5cf6"}`,
+        boxShadow: `0 0 ${avatarGlowRadius}px ${avatarGlowSpread}px ${avatarGlowColor}`,
       }
     : {};
 
@@ -495,6 +534,17 @@ export default function BioPreview({ config, interactive = false }: BioPreviewPr
               const LinkIcon = getLinkIcon(link.icon);
               const isLiquidGlass = linkStyle.surfaceTreatment === "liquid-glass";
 
+              const gRadius = linkStyle.glowRadius ?? 20;
+              const gSpread = linkStyle.glowSpread ?? 0;
+              const gOpacity = Math.min((linkStyle.glowOpacity ?? 55) * 1.3, 100);
+              const hoverGlowColor = hexToRgba(linkStyle.glowColor || "#8b5cf6", gOpacity);
+              const hoverGlowShadow = `0 0 ${Math.round(gRadius * 1.4) + 6}px ${gSpread + 2}px ${hoverGlowColor}`;
+              const shouldHoverGlow =
+                linkStyle.glowEnabled !== false &&
+                (linkStyle.glowMode === "hover" ||
+                  linkStyle.glowMode === "both" ||
+                  linkStyle.hoverEffect === "glow");
+
               return (
                 <motion.a
                   key={link.id}
@@ -502,8 +552,19 @@ export default function BioPreview({ config, interactive = false }: BioPreviewPr
                   target="_blank"
                   rel="noopener noreferrer"
                   variants={interactive ? item : undefined}
-                  className={`group block w-full px-5 py-4 transform transition-all duration-300 relative overflow-hidden ${getHoverClass()}`}
+                  className={`group block w-full px-5 py-4 transform transition-all duration-300 relative overflow-hidden ${getHoverClass()} ${
+                    linkStyle.glowEnabled !== false && linkStyle.glowPulse
+                      ? "animate-[pulse-glow_3s_ease-in-out_infinite]"
+                      : ""
+                  }`}
                   style={getLinkButtonStyle()}
+                  whileHover={
+                    interactive && shouldHoverGlow
+                      ? {
+                          boxShadow: `${getLinkButtonStyle().boxShadow ? `${getLinkButtonStyle().boxShadow}, ` : ""}${hoverGlowShadow}`,
+                        }
+                      : undefined
+                  }
                   whileTap={interactive ? { scale: 0.98 } : undefined}
                 >
                   {/* Apple Liquid glass top curved reflection sheen (stationary, no moving line) */}

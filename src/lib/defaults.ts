@@ -54,7 +54,9 @@ export const DEFAULT_CONFIG: BioConfig = {
     avatarBorderStyle: "solid",
     avatarGlow: true,
     avatarGlowColor: "#8b5cf6",
-    avatarGlowRadius: 18,
+    avatarGlowRadius: 22,
+    avatarGlowSpread: 0,
+    avatarGlowOpacity: 70,
     avatarGlowPulse: false,
   },
   theme: {
@@ -101,6 +103,13 @@ export const DEFAULT_CONFIG: BioConfig = {
     glassBlur: 28,
     glassGloss: 80,
     badgeStyle: "pill",
+    glowEnabled: true,
+    glowColor: "#8b5cf6",
+    glowRadius: 20,
+    glowSpread: 0,
+    glowOpacity: 55,
+    glowMode: "both",
+    glowPulse: false,
   },
   links: [
     {

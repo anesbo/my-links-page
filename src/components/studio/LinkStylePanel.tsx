@@ -182,6 +182,77 @@ export default function LinkStylePanel() {
         />
       </div>
 
+      {/* Capsule Glow & Aura */}
+      <div className="pt-2 border-t border-white/[0.06] space-y-3">
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-violet-300">
+          <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+          <span>Capsule Glow & Aura</span>
+        </div>
+
+        <Toggle
+          label="Enable Capsule Glow"
+          checked={linkStyle.glowEnabled ?? true}
+          onChange={(v) => updateLinkStyle("glowEnabled", v)}
+        />
+
+        {linkStyle.glowEnabled !== false && (
+          <div className="p-3 rounded-xl bg-violet-500/[0.05] border border-violet-500/20 space-y-3">
+            <ColorPicker
+              label="Glow Color"
+              value={linkStyle.glowColor || "#8b5cf6"}
+              onChange={(v) => updateLinkStyle("glowColor", v)}
+            />
+
+            <Slider
+              label="Glow Radius (Size / Distance)"
+              value={linkStyle.glowRadius ?? 20}
+              min={0}
+              max={100}
+              step={1}
+              unit="px"
+              onChange={(v) => updateLinkStyle("glowRadius", v)}
+            />
+
+            <Slider
+              label="Glow Spread Thickness"
+              value={linkStyle.glowSpread ?? 0}
+              min={0}
+              max={30}
+              step={1}
+              unit="px"
+              onChange={(v) => updateLinkStyle("glowSpread", v)}
+            />
+
+            <Slider
+              label="Glow Opacity / Intensity"
+              value={linkStyle.glowOpacity ?? 55}
+              min={5}
+              max={100}
+              step={5}
+              unit="%"
+              onChange={(v) => updateLinkStyle("glowOpacity", v)}
+            />
+
+            <ButtonGroup<"always" | "both" | "hover">
+              label="Glow Trigger Mode"
+              value={linkStyle.glowMode || "both"}
+              options={[
+                { value: "always", label: "Always" },
+                { value: "both", label: "Both" },
+                { value: "hover", label: "Hover" },
+              ]}
+              onChange={(v) => updateLinkStyle("glowMode", v)}
+            />
+
+            <Toggle
+              label="Pulsing Glow Animation"
+              checked={linkStyle.glowPulse ?? false}
+              onChange={(v) => updateLinkStyle("glowPulse", v)}
+            />
+          </div>
+        )}
+      </div>
+
       {/* Capsule Badges Default Style */}
       <div className="pt-2 border-t border-white/[0.06] space-y-2">
         <ButtonGroup<"pill" | "solid" | "glow" | "outline">
