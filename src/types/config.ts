@@ -178,3 +178,31 @@ export interface BioConfig {
   analytics: AnalyticsConfig;
   footer: FooterConfig;
 }
+
+// ─── Preset Templates Types ─────────────────────────────────────────────────
+
+export type TemplateCategory =
+  | "All"
+  | "Modern"
+  | "Aesthetic"
+  | "Dark/Cyber"
+  | "Minimal"
+  | "Luxury"
+  | "Vibrant"
+  | "Nature";
+
+export interface TemplateConfig {
+  id: string;
+  name: string;
+  description: string;
+  category: TemplateCategory;
+  accentColor: string;
+  previewGradient: string;
+  badge?: string;
+  config: {
+    theme: Partial<ThemeConfig>;
+    identity?: Partial<IdentityConfig>;
+    linkStyle: Partial<LinkStyle>;
+    footer?: Partial<FooterConfig>;
+  };
+}
