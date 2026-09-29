@@ -36,15 +36,15 @@ export const BACKGROUND_PRESETS = [
 export const DEFAULT_CONFIG: BioConfig = {
   identity: {
     avatarUrl: "",
-    displayName: "Your Name",
-    subtitle: "Developer · Creator · Dreamer ✨",
+    displayName: "Anes Bouziad",
+    subtitle: "Developer · Creator · Tech Enthusiast ✨",
     verified: true,
     socialLinks: [
-      { id: "s1", platform: "github", url: "https://github.com" },
+      { id: "s1", platform: "github", url: "https://github.com/anesbo" },
       { id: "s2", platform: "twitter", url: "https://x.com" },
       { id: "s3", platform: "linkedin", url: "https://linkedin.com" },
       { id: "s4", platform: "instagram", url: "https://instagram.com" },
-      { id: "s5", platform: "email", url: "mailto:hello@example.com" },
+      { id: "s5", platform: "email", url: "mailto:anesbo2005@gmail.com" },
     ],
     socialLayoutStyle: "minimal",
     avatarShape: "circle",
