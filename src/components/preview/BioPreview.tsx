@@ -58,24 +58,39 @@ export default function BioPreview({ config, interactive = false }: BioPreviewPr
         const hexAlpha = Math.round((opacity / 100) * 255)
           .toString(16)
           .padStart(2, "0");
+        const blur = linkStyle.glassBlur ?? 16;
         base.backgroundColor = `${linkStyle.surfaceColor}${hexAlpha}`;
-        base.backdropFilter = "blur(16px)";
-        base.WebkitBackdropFilter = "blur(16px)";
+        base.backdropFilter = `blur(${blur}px)`;
+        base.WebkitBackdropFilter = `blur(${blur}px)`;
         break;
       }
       case "liquid-glass": {
         // iPhone Apple-style liquid glass
-        const opacity = Math.max(linkStyle.surfaceOpacity ?? 12, 6);
+        const opacity = Math.min(Math.max(linkStyle.surfaceOpacity ?? 10, 0), 60);
         const hexAlpha = Math.round((opacity / 100) * 255)
           .toString(16)
           .padStart(2, "0");
+        const blur = linkStyle.glassBlur ?? 28;
+        const gloss = (linkStyle.glassGloss ?? 80) / 100;
+        const saturate = 150 + Math.round(gloss * 70);
+
         base.backgroundColor = `${linkStyle.surfaceColor}${hexAlpha}`;
-        base.backdropFilter = "blur(24px) saturate(180%)";
-        base.WebkitBackdropFilter = "blur(24px) saturate(180%)";
+        base.backdropFilter = `blur(${blur}px) saturate(${saturate}%) contrast(106%)`;
+        base.WebkitBackdropFilter = `blur(${blur}px) saturate(${saturate}%) contrast(106%)`;
+
+        // Apple glass double specular rim highlight & deep ambient refraction
+        const specularInsetTop = `inset 0 1.5px 1.5px 0 rgba(255, 255, 255, ${(0.3 + gloss * 0.55).toFixed(2)})`;
+        const specularInsetBottom = `inset 0 -1.5px 2px 0 rgba(0, 0, 0, ${(0.15 + gloss * 0.2).toFixed(2)})`;
+        const ambientInnerGlow = `inset 0 0 ${Math.round(blur * 0.5)}px 0 rgba(255, 255, 255, ${(gloss * 0.1).toFixed(2)})`;
+
         base.boxShadow =
           base.boxShadow && base.boxShadow !== "none"
-            ? `${base.boxShadow}, inset 0 1px 1px 0 rgba(255,255,255,0.45), inset 0 -1px 2px 0 rgba(0,0,0,0.2)`
-            : "0 10px 30px -5px rgba(0,0,0,0.35), inset 0 1px 1px 0 rgba(255,255,255,0.45), inset 0 -1px 2px 0 rgba(0,0,0,0.2)";
+            ? `${base.boxShadow}, ${specularInsetTop}, ${specularInsetBottom}, ${ambientInnerGlow}`
+            : `0 12px 32px -4px rgba(0, 0, 0, 0.35), ${specularInsetTop}, ${specularInsetBottom}, ${ambientInnerGlow}`;
+
+        if (!linkStyle.borderWidth || linkStyle.borderWidth <= 1) {
+          base.borderColor = `rgba(255, 255, 255, ${(0.15 + gloss * 0.3).toFixed(2)})`;
+        }
         break;
       }
       case "neumorphic":
@@ -487,21 +502,16 @@ export default function BioPreview({ config, interactive = false }: BioPreviewPr
                   target="_blank"
                   rel="noopener noreferrer"
                   variants={interactive ? item : undefined}
-                  className={`group block w-full px-5 py-4 transform transition-all duration-300 relative overflow-hidden ${getHoverClass()} ${
-                    isLiquidGlass && linkStyle.liquidGlassGleam !== false
-                      ? "liquid-glass-gleam"
-                      : ""
-                  }`}
+                  className={`group block w-full px-5 py-4 transform transition-all duration-300 relative overflow-hidden ${getHoverClass()}`}
                   style={getLinkButtonStyle()}
                   whileTap={interactive ? { scale: 0.98 } : undefined}
                 >
-                  {/* Liquid glass top reflection shimmer */}
+                  {/* Apple Liquid glass top curved reflection sheen (stationary, no moving line) */}
                   {isLiquidGlass && (
                     <div
-                      className="absolute top-0 left-0 right-0 h-1/2 pointer-events-none rounded-t-[inherit]"
+                      className="absolute top-0 left-0 right-0 h-1/2 pointer-events-none rounded-t-[inherit] transition-opacity duration-300"
                       style={{
-                        background:
-                          "linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.02) 100%)",
+                        background: `linear-gradient(180deg, rgba(255, 255, 255, ${(((linkStyle.glassGloss ?? 80) / 100) * 0.38).toFixed(2)}) 0%, rgba(255, 255, 255, ${(((linkStyle.glassGloss ?? 80) / 100) * 0.05).toFixed(2)}) 55%, transparent 100%)`,
                       }}
                     />
                   )}

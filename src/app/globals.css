@@ -26,11 +26,6 @@
   75% { transform: translateX(4px); }
 }
 
-@keyframes liquid-gleam {
-  0% { transform: translateX(-150%) skewX(-20deg); }
-  50%, 100% { transform: translateX(200%) skewX(-20deg); }
-}
-
 @keyframes pulse-glow {
   0%, 100% { opacity: 0.6; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.05); }
@@ -115,14 +110,14 @@ html, body {
 .liquid-glass-effect {
   position: relative;
   overflow: hidden;
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.24);
+  backdrop-filter: blur(24px) saturate(190%) contrast(105%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%) contrast(105%);
+  border: 1px solid rgba(255, 255, 255, 0.28);
   box-shadow: 
-    0 10px 30px -5px rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.1) inset,
-    0 1px 2px 0 rgba(255, 255, 255, 0.4) inset,
-    0 -1px 2px 0 rgba(0, 0, 0, 0.2) inset;
+    0 12px 32px -4px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.15) inset,
+    0 1.5px 2px 0 rgba(255, 255, 255, 0.6) inset,
+    0 -1px 2px 0 rgba(0, 0, 0, 0.25) inset;
 }
 
 .liquid-glass-effect::before {
@@ -131,28 +126,8 @@ html, body {
   top: 0;
   left: 0;
   right: 0;
-  height: 50%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.02) 100%);
+  height: 52%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.03) 100%);
   pointer-events: none;
   border-radius: inherit;
-}
-
-.liquid-glass-gleam::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 45%;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.03) 20%,
-    rgba(255, 255, 255, 0.25) 50%,
-    rgba(255, 255, 255, 0.03) 80%,
-    transparent 100%
-  );
-  transform: translateX(-150%) skewX(-20deg);
-  animation: liquid-gleam 6s infinite ease-in-out;
-  pointer-events: none;
 }

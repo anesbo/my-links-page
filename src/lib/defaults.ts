@@ -98,7 +98,8 @@ export const DEFAULT_CONFIG: BioConfig = {
     subtextColor: "#9ca3af",
     iconColor: "#a78bfa",
     shadow: "subtle",
-    liquidGlassGleam: true,
+    glassBlur: 28,
+    glassGloss: 80,
     badgeStyle: "pill",
   },
   links: [

@@ -41,19 +41,65 @@ export default function LinkStylePanel() {
         onChange={(v) => updateLinkStyle("surfaceTreatment", v)}
       />
 
+      {/* Liquid Glass & Glass Controls */}
       {linkStyle.surfaceTreatment === "liquid-glass" && (
-        <div className="p-2.5 rounded-lg bg-violet-500/[0.06] border border-violet-500/20 space-y-2">
-          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-violet-300">
-            <Sparkles className="w-3 h-3 text-violet-400" />
-            <span>Apple iPhone Liquid Glass Active</span>
+        <div className="p-3 rounded-xl bg-violet-500/[0.06] border border-violet-500/20 space-y-3">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-violet-300">
+            <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+            <span>Apple iPhone Glass Customization</span>
           </div>
-          <p className="text-[10px] text-white/50 leading-relaxed">
-            Multi-layered backdrop refraction, specular top highlight, and ultra-smooth blur.
-          </p>
-          <Toggle
-            label="Gleam Sweep Animation"
-            checked={linkStyle.liquidGlassGleam !== false}
-            onChange={(v) => updateLinkStyle("liquidGlassGleam", v)}
+
+          <Slider
+            label="Glassiness & Specular Reflection"
+            value={linkStyle.glassGloss ?? 80}
+            min={0}
+            max={100}
+            step={5}
+            unit="%"
+            onChange={(v) => updateLinkStyle("glassGloss", v)}
+          />
+
+          <Slider
+            label="Glass Blur Depth (Frosted Depth)"
+            value={linkStyle.glassBlur ?? 28}
+            min={4}
+            max={50}
+            step={2}
+            unit="px"
+            onChange={(v) => updateLinkStyle("glassBlur", v)}
+          />
+
+          <Slider
+            label="Glass Surface Translucency"
+            value={linkStyle.surfaceOpacity ?? 10}
+            min={0}
+            max={50}
+            step={1}
+            unit="%"
+            onChange={(v) => updateLinkStyle("surfaceOpacity", v)}
+          />
+        </div>
+      )}
+
+      {linkStyle.surfaceTreatment === "glass" && (
+        <div className="space-y-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+          <Slider
+            label="Glass Blur Depth"
+            value={linkStyle.glassBlur ?? 16}
+            min={4}
+            max={40}
+            step={2}
+            unit="px"
+            onChange={(v) => updateLinkStyle("glassBlur", v)}
+          />
+          <Slider
+            label="Glass Translucency"
+            value={linkStyle.surfaceOpacity ?? 12}
+            min={0}
+            max={50}
+            step={1}
+            unit="%"
+            onChange={(v) => updateLinkStyle("surfaceOpacity", v)}
           />
         </div>
       )}
@@ -64,17 +110,6 @@ export default function LinkStylePanel() {
         value={linkStyle.surfaceColor}
         onChange={(v) => updateLinkStyle("surfaceColor", v)}
       />
-      {(linkStyle.surfaceTreatment === "glass" ||
-        linkStyle.surfaceTreatment === "liquid-glass") && (
-        <Slider
-          label="Glass Translucency"
-          value={linkStyle.surfaceOpacity ?? 12}
-          min={4}
-          max={45}
-          unit="%"
-          onChange={(v) => updateLinkStyle("surfaceOpacity", v)}
-        />
-      )}
 
       {/* Geometry */}
       <div className="pt-2 border-t border-white/[0.06] space-y-3">
