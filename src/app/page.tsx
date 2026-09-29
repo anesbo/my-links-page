@@ -7,8 +7,8 @@ export default function HomePage() {
   const { config } = useConfig();
 
   return (
-    <div className="min-h-screen">
+    <main className="min-h-screen min-h-[100dvh] w-full flex flex-col flex-1">
       <BioPreview config={config} interactive />
-    </div>
+    </main>
   );
 }

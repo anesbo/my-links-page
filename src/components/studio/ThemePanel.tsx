@@ -7,14 +7,19 @@ import {
   Slider,
   ButtonGroup,
   Select,
+  Toggle,
+  TextInput,
 } from "@/components/ui/FormControls";
-import { Palette, Plus, Trash2 } from "lucide-react";
+import { Palette, Plus, Trash2, Image as ImageIcon, Sparkles } from "lucide-react";
 import {
   BackgroundType,
   FontFamily,
   GradientStop,
+  ShapesStyle,
+  ShapesSpeed,
 } from "@/types/config";
 import { getFontFamilyLabel } from "@/lib/utils";
+import { BACKGROUND_PRESETS } from "@/lib/defaults";
 
 export default function ThemePanel() {
   const { config, updateConfig } = useConfig();
@@ -72,13 +77,20 @@ export default function ThemePanel() {
 
   const fontOptions: { value: FontFamily; label: string }[] = [
     { value: "sans", label: getFontFamilyLabel("sans") },
-    { value: "serif", label: getFontFamilyLabel("serif") },
-    { value: "mono", label: getFontFamilyLabel("mono") },
     { value: "display", label: getFontFamilyLabel("display") },
+    { value: "rounded", label: getFontFamilyLabel("rounded") },
+    { value: "poppins", label: getFontFamilyLabel("poppins") },
+    { value: "syne", label: getFontFamilyLabel("syne") },
+    { value: "serif", label: getFontFamilyLabel("serif") },
+    { value: "cinzel", label: getFontFamilyLabel("cinzel") },
+    { value: "mono", label: getFontFamilyLabel("mono") },
+    { value: "bricolage", label: getFontFamilyLabel("bricolage") },
+    { value: "bebas", label: getFontFamilyLabel("bebas") },
+    { value: "handwritten", label: getFontFamilyLabel("handwritten") },
   ];
 
   return (
-    <StudioSection title="Theme & Typography" icon={<Palette className="w-4 h-4" />}>
+    <StudioSection title="Theme & Background" icon={<Palette className="w-4 h-4" />}>
       {/* Background Type */}
       <ButtonGroup<BackgroundType>
         label="Background Type"
@@ -88,6 +100,7 @@ export default function ThemePanel() {
           { value: "linear-gradient", label: "Linear" },
           { value: "radial-gradient", label: "Radial" },
           { value: "mesh", label: "Mesh" },
+          { value: "image", label: "Image" },
         ]}
         onChange={(v) => updateBackground("type", v)}
       />
@@ -99,6 +112,85 @@ export default function ThemePanel() {
           value={theme.background.solidColor}
           onChange={(v) => updateBackground("solidColor", v)}
         />
+      )}
+
+      {/* Background Image Controls */}
+      {theme.background.type === "image" && (
+        <div className="space-y-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-violet-400">
+            <ImageIcon className="w-3.5 h-3.5" />
+            <span>Curated Image Presets</span>
+          </div>
+
+          {/* Preset Wallpapers */}
+          <div className="grid grid-cols-3 gap-1.5">
+            {BACKGROUND_PRESETS.map((preset) => {
+              const isSelected = theme.background.imageUrl === preset.url;
+              return (
+                <button
+                  key={preset.id}
+                  onClick={() => updateBackground("imageUrl", preset.url)}
+                  className={`group relative h-14 rounded-lg overflow-hidden border transition-all text-left ${
+                    isSelected
+                      ? "border-violet-500 ring-2 ring-violet-500/40"
+                      : "border-white/10 hover:border-white/30"
+                  }`}
+                >
+                  <img
+                    src={preset.url}
+                    alt={preset.name}
+                    className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-black/40 flex items-end p-1">
+                    <span className="text-[10px] font-medium text-white truncate drop-shadow">
+                      {preset.name}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <TextInput
+            label="Custom Image URL"
+            value={theme.background.imageUrl}
+            placeholder="https://images.unsplash.com/..."
+            onChange={(v) => updateBackground("imageUrl", v)}
+          />
+
+          <Slider
+            label="Image Opacity"
+            value={theme.background.imageOpacity ?? 85}
+            min={10}
+            max={100}
+            unit="%"
+            onChange={(v) => updateBackground("imageOpacity", v)}
+          />
+
+          <Slider
+            label="Image Blur Effect"
+            value={theme.background.imageBlur ?? 0}
+            min={0}
+            max={20}
+            unit="px"
+            onChange={(v) => updateBackground("imageBlur", v)}
+          />
+
+          <ColorPicker
+            label="Color Overlay Tint"
+            value={theme.background.imageOverlayColor || "#000000"}
+            onChange={(v) => updateBackground("imageOverlayColor", v)}
+          />
+
+          <Slider
+            label="Overlay Tint Intensity"
+            value={theme.background.imageOverlayOpacity ?? 35}
+            min={0}
+            max={90}
+            unit="%"
+            onChange={(v) => updateBackground("imageOverlayOpacity", v)}
+          />
+        </div>
       )}
 
       {/* Gradient Controls */}
@@ -190,32 +282,92 @@ export default function ThemePanel() {
         </div>
       )}
 
+      {/* Decorative Floating Shapes ("shapes and things") */}
+      <div className="pt-3 border-t border-white/[0.06] space-y-3">
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-violet-400">
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>Floating Shapes & Ambient Effects</span>
+        </div>
+
+        <Toggle
+          label="Enable Decorative Shapes"
+          checked={theme.background.shapesEnabled ?? true}
+          onChange={(v) => updateBackground("shapesEnabled", v)}
+        />
+
+        {theme.background.shapesEnabled && (
+          <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06] space-y-3">
+            <Select
+              label="Shape Style"
+              value={theme.background.shapesStyle || "blobs"}
+              options={[
+                { value: "blobs", label: "Organic Glowing Blobs" },
+                { value: "geometric", label: "Floating Geometric Shapes" },
+                { value: "bokeh", label: "Drifting Bokeh Lights" },
+                { value: "grid", label: "Cyber Dot Matrix Grid" },
+                { value: "rings", label: "Concentric Cosmic Rings" },
+                { value: "stars", label: "Twinkling Night Stars" },
+              ]}
+              onChange={(v) => updateBackground("shapesStyle", v as ShapesStyle)}
+            />
+
+            <ColorPicker
+              label="Shape Tint Color"
+              value={theme.background.shapesColor || "#8b5cf6"}
+              onChange={(v) => updateBackground("shapesColor", v)}
+            />
+
+            <Slider
+              label="Shape Visibility"
+              value={theme.background.shapesOpacity ?? 30}
+              min={5}
+              max={80}
+              unit="%"
+              onChange={(v) => updateBackground("shapesOpacity", v)}
+            />
+
+            <ButtonGroup<ShapesSpeed>
+              label="Animation Speed"
+              value={theme.background.shapesSpeed || "normal"}
+              options={[
+                { value: "slow", label: "Calm" },
+                { value: "normal", label: "Normal" },
+                { value: "fast", label: "Dynamic" },
+              ]}
+              onChange={(v) => updateBackground("shapesSpeed", v)}
+            />
+          </div>
+        )}
+      </div>
+
       {/* Typography */}
-      <Select
-        label="Font Family"
-        value={theme.fontFamily}
-        options={fontOptions}
-        onChange={(v) => updateTheme("fontFamily", v as FontFamily)}
-      />
-      <Slider
-        label="Font Scale"
-        value={theme.fontScale}
-        min={0.8}
-        max={1.4}
-        step={0.05}
-        unit="x"
-        onChange={(v) => updateTheme("fontScale", v)}
-      />
-      <ColorPicker
-        label="Heading Color"
-        value={theme.headingColor}
-        onChange={(v) => updateTheme("headingColor", v)}
-      />
-      <ColorPicker
-        label="Bio Text Color"
-        value={theme.bioTextColor}
-        onChange={(v) => updateTheme("bioTextColor", v)}
-      />
+      <div className="pt-3 border-t border-white/[0.06] space-y-3">
+        <Select
+          label="Font Family (11 Styles)"
+          value={theme.fontFamily}
+          options={fontOptions}
+          onChange={(v) => updateTheme("fontFamily", v as FontFamily)}
+        />
+        <Slider
+          label="Font Scale"
+          value={theme.fontScale}
+          min={0.8}
+          max={1.4}
+          step={0.05}
+          unit="x"
+          onChange={(v) => updateTheme("fontScale", v)}
+        />
+        <ColorPicker
+          label="Heading Color"
+          value={theme.headingColor}
+          onChange={(v) => updateTheme("headingColor", v)}
+        />
+        <ColorPicker
+          label="Bio Subtext Color"
+          value={theme.bioTextColor}
+          onChange={(v) => updateTheme("bioTextColor", v)}
+        />
+      </div>
     </StudioSection>
   );
 }

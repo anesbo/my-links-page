@@ -1,12 +1,4 @@
 import {
-  Github,
-  Twitter,
-  Linkedin,
-  Youtube,
-  Instagram,
-  MessageCircle,
-  Mail,
-  Music2,
   Globe,
   FileText,
   Play,
@@ -30,19 +22,26 @@ import {
   Video,
   Image,
   Sparkles,
+  Mail,
+  MessageCircle,
+  Music,
+  Code,
+  AtSign,
+  Send,
   type LucideIcon,
 } from "lucide-react";
 import { SocialPlatform } from "@/types/config";
 
+// Using generic icons since Lucide removed brand icons
 export const SOCIAL_ICONS: Record<SocialPlatform, LucideIcon> = {
-  github: Github,
-  twitter: Twitter,
-  linkedin: Linkedin,
-  youtube: Youtube,
-  instagram: Instagram,
+  github: Code,
+  twitter: AtSign,
+  linkedin: ExternalLink,
+  youtube: Play,
+  instagram: Camera,
   discord: MessageCircle,
   email: Mail,
-  tiktok: Music2,
+  tiktok: Music,
   website: Globe,
 };
 
@@ -81,10 +80,10 @@ export const LINK_ICONS: Record<string, LucideIcon> = {
   MessageSquare: MessageSquare,
   Video: Video,
   Image: Image,
-  Github: Github,
-  Youtube: Youtube,
-  Instagram: Instagram,
-  Twitter: Twitter,
+  Code: Code,
+  Mail: Mail,
+  Send: Send,
+  Music: Music,
   Sparkles: Sparkles,
 };
 

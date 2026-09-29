@@ -29,9 +29,9 @@ function loadConfig(): BioConfig {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
-      const parsed = JSON.parse(raw) as BioConfig;
+      const parsed = JSON.parse(raw);
       // Merge with defaults to handle any missing new fields
-      return deepMerge(DEFAULT_CONFIG, parsed) as BioConfig;
+      return deepMerge(DEFAULT_CONFIG, parsed);
     }
   } catch {
     // corrupted storage
@@ -47,27 +47,25 @@ function saveConfig(config: BioConfig) {
   }
 }
 
-function deepMerge(target: Record<string, unknown>, source: Record<string, unknown>): Record<string, unknown> {
-  const output = { ...target };
+/* eslint-disable @typescript-eslint/no-explicit-any */
+function deepMerge<T>(target: T, source: any): T {
+  if (!source || typeof source !== "object" || Array.isArray(source)) return source as T;
+  const output: any = { ...(target as any) };
   for (const key of Object.keys(source)) {
+    const sv = source[key];
+    const tv = (target as any)[key];
     if (
-      source[key] &&
-      typeof source[key] === "object" &&
-      !Array.isArray(source[key]) &&
-      target[key] &&
-      typeof target[key] === "object" &&
-      !Array.isArray(target[key])
+      sv && typeof sv === "object" && !Array.isArray(sv) &&
+      tv && typeof tv === "object" && !Array.isArray(tv)
     ) {
-      output[key] = deepMerge(
-        target[key] as Record<string, unknown>,
-        source[key] as Record<string, unknown>
-      );
+      output[key] = deepMerge(tv, sv);
     } else {
-      output[key] = source[key];
+      output[key] = sv;
     }
   }
-  return output;
+  return output as T;
 }
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 export function ConfigProvider({ children }: { children: ReactNode }) {
   const [config, setConfigState] = useState<BioConfig>(DEFAULT_CONFIG);

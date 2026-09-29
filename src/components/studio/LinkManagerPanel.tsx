@@ -12,11 +12,21 @@ import {
   ChevronUp,
   Eye,
   EyeOff,
+  Tag,
+  X,
 } from "lucide-react";
 import { BioLink } from "@/types/config";
 import { generateId } from "@/lib/utils";
 import { AVAILABLE_ICONS, getLinkIcon } from "@/lib/icons";
 import { useState } from "react";
+
+const BADGE_PRESETS = [
+  { label: "Featured", bg: "#8b5cf6", text: "#ffffff" },
+  { label: "New", bg: "#10b981", text: "#ffffff" },
+  { label: "Hot 🔥", bg: "#ef4444", text: "#ffffff" },
+  { label: "Popular", bg: "#f59e0b", text: "#ffffff" },
+  { label: "Must See", bg: "#ec4899", text: "#ffffff" },
+];
 
 export default function LinkManagerPanel() {
   const { config, updateConfig } = useConfig();
@@ -38,7 +48,8 @@ export default function LinkManagerPanel() {
       subtitle: "",
       icon: "Link2",
       badge: "",
-      badgeColor: "#a78bfa",
+      badgeColor: "#ffffff",
+      badgeBgColor: "#8b5cf6",
       clicks: 0,
       enabled: true,
     };
@@ -67,9 +78,9 @@ export default function LinkManagerPanel() {
   }
 
   return (
-    <StudioSection title="Link Manager" icon={<Link2 className="w-4 h-4" />} defaultOpen>
+    <StudioSection title="Capsule Links Manager" icon={<Link2 className="w-4 h-4" />} defaultOpen>
       <Toggle
-        label="Show Click Counts"
+        label="Show Click Counts on Capsules"
         checked={analytics.showClickCounts}
         onChange={(v) =>
           updateConfig((prev) => ({
@@ -87,9 +98,9 @@ export default function LinkManagerPanel() {
           return (
             <div
               key={link.id}
-              className={`rounded-lg border transition-colors ${
+              className={`rounded-lg border transition-all ${
                 isExpanded
-                  ? "border-violet-500/30 bg-violet-500/[0.04]"
+                  ? "border-violet-500/40 bg-violet-500/[0.05]"
                   : "border-white/[0.06] bg-white/[0.02]"
               }`}
             >
@@ -102,18 +113,29 @@ export default function LinkManagerPanel() {
                 />
                 <button
                   onClick={() => setExpandedId(isExpanded ? null : link.id)}
-                  className="flex-1 text-left min-w-0"
+                  className="flex-1 text-left min-w-0 flex items-center gap-2"
                 >
-                  <span className="text-sm text-white/80 truncate block">
+                  <span className="text-sm font-medium text-white/90 truncate">
                     {link.title}
                   </span>
+                  {link.badge && (
+                    <span
+                      className="shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase"
+                      style={{
+                        backgroundColor: link.badgeBgColor || "#8b5cf6",
+                        color: link.badgeColor || "#ffffff",
+                      }}
+                    >
+                      {link.badge}
+                    </span>
+                  )}
                 </button>
                 <div className="flex items-center gap-1 shrink-0">
                   <button
                     onClick={() => updateLink(link.id, { enabled: !link.enabled })}
                     className={`p-1 rounded transition-colors ${
                       link.enabled
-                        ? "text-green-400/60 hover:text-green-400"
+                        ? "text-green-400/80 hover:text-green-400"
                         : "text-white/20 hover:text-white/40"
                     }`}
                     title={link.enabled ? "Visible" : "Hidden"}
@@ -149,29 +171,29 @@ export default function LinkManagerPanel() {
 
               {/* Expanded editor */}
               {isExpanded && (
-                <div className="px-3 pb-3 space-y-3 border-t border-white/[0.04] pt-3">
+                <div className="px-3 pb-3 space-y-3 border-t border-white/[0.06] pt-3">
                   <TextInput
-                    label="Title"
+                    label="Link Title"
                     value={link.title}
                     onChange={(v) => updateLink(link.id, { title: v })}
                   />
                   <TextInput
-                    label="URL"
+                    label="Destination URL"
                     value={link.url}
                     placeholder="https://example.com"
                     onChange={(v) => updateLink(link.id, { url: v })}
                   />
                   <TextInput
-                    label="Subtitle"
+                    label="Subtitle (Optional)"
                     value={link.subtitle || ""}
-                    placeholder="Optional description"
+                    placeholder="Brief description under title"
                     onChange={(v) => updateLink(link.id, { subtitle: v })}
                   />
 
                   {/* Icon Selector */}
                   <div className="space-y-1.5">
                     <label className="text-xs text-white/60 block">Icon</label>
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto p-1.5 rounded-lg bg-white/[0.02] border border-white/[0.05]">
                       {AVAILABLE_ICONS.map((iconName) => {
                         const Icon = getLinkIcon(iconName);
                         return (
@@ -192,21 +214,72 @@ export default function LinkManagerPanel() {
                     </div>
                   </div>
 
-                  {/* Badge */}
-                  <div className="flex gap-2">
-                    <div className="flex-1">
-                      <TextInput
-                        label="Badge"
-                        value={link.badge || ""}
-                        placeholder="e.g. Featured, New"
-                        onChange={(v) => updateLink(link.id, { badge: v })}
-                      />
+                  {/* Capsule Badge / Tag (Enhanced) */}
+                  <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.08] space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-violet-300">
+                        <Tag className="w-3.5 h-3.5" />
+                        <span>Capsule Badge / Tag</span>
+                      </div>
+                      {link.badge && (
+                        <button
+                          onClick={() => updateLink(link.id, { badge: "" })}
+                          className="flex items-center gap-1 text-[10px] text-red-400/80 hover:text-red-400"
+                          title="Remove badge"
+                        >
+                          <X className="w-3 h-3" /> Remove Badge
+                        </button>
+                      )}
                     </div>
+
+                    {/* Quick presets */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-white/40 block">Quick Presets</label>
+                      <div className="flex flex-wrap gap-1">
+                        {BADGE_PRESETS.map((preset) => (
+                          <button
+                            key={preset.label}
+                            onClick={() =>
+                              updateLink(link.id, {
+                                badge: preset.label,
+                                badgeBgColor: preset.bg,
+                                badgeColor: preset.text,
+                              })
+                            }
+                            className={`px-2 py-1 text-[10px] rounded-md border font-medium transition-all ${
+                              link.badge === preset.label
+                                ? "border-violet-400 text-white"
+                                : "border-white/10 text-white/60 hover:text-white hover:border-white/30"
+                            }`}
+                            style={{
+                              backgroundColor:
+                                link.badge === preset.label ? `${preset.bg}40` : "transparent",
+                            }}
+                          >
+                            {preset.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Custom Badge Text Input */}
+                    <TextInput
+                      label="Custom Badge Text"
+                      value={link.badge || ""}
+                      placeholder="e.g. Featured, New, 50% Off, Coming Soon"
+                      onChange={(v) => updateLink(link.id, { badge: v })}
+                    />
+
                     {link.badge && (
-                      <div className="pt-5">
+                      <div className="space-y-2 pt-1 border-t border-white/[0.05]">
                         <ColorPicker
-                          label=""
-                          value={link.badgeColor || "#a78bfa"}
+                          label="Badge Background"
+                          value={link.badgeBgColor || "#8b5cf6"}
+                          onChange={(v) => updateLink(link.id, { badgeBgColor: v })}
+                        />
+                        <ColorPicker
+                          label="Badge Text Color"
+                          value={link.badgeColor || "#ffffff"}
                           onChange={(v) => updateLink(link.id, { badgeColor: v })}
                         />
                       </div>
@@ -215,7 +288,7 @@ export default function LinkManagerPanel() {
 
                   {/* Click Count */}
                   <div className="space-y-1.5">
-                    <label className="text-xs text-white/60 block">Mock Clicks</label>
+                    <label className="text-xs text-white/60 block">Mock Clicks Count</label>
                     <input
                       type="number"
                       min={0}
@@ -235,10 +308,10 @@ export default function LinkManagerPanel() {
 
       <button
         onClick={addLink}
-        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-dashed border-white/10 text-white/50 hover:text-white/80 hover:border-violet-500/30 hover:bg-violet-500/5 transition-all text-sm"
+        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-dashed border-white/15 text-white/60 hover:text-white hover:border-violet-500/50 hover:bg-violet-500/10 transition-all text-sm font-medium"
       >
         <Plus className="w-4 h-4" />
-        Add Link
+        Add New Capsule Link
       </button>
     </StudioSection>
   );
