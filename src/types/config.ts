@@ -47,11 +47,15 @@ export interface GradientStop {
 
 export type ShapesStyle =
   | "blobs"
+  | "circles"
+  | "squares"
+  | "diamonds"
+  | "triangles"
+  | "stars"
+  | "rings"
   | "geometric"
   | "bokeh"
-  | "grid"
-  | "rings"
-  | "stars";
+  | "grid";
 
 export type ShapesSpeed = "slow" | "normal" | "fast" | "static";
 
@@ -75,6 +79,7 @@ export interface BackgroundConfig {
   shapesOpacity: number; // 0-100
   shapesColor: string;
   shapesSpeed: ShapesSpeed;
+  shapesCount?: number; // 1 to 20 shapes
 }
 
 export type SurfaceTreatment =
@@ -167,6 +172,12 @@ export interface ThemeConfig {
   fontScale: number; // 0.8 to 1.4
   headingColor: string;
   bioTextColor: string;
+  // Page Layout & Spacing
+  pagePaddingTop?: number; // 12 to 120 px
+  pagePaddingBottom?: number; // 12 to 120 px
+  pagePaddingX?: number; // 8 to 48 px
+  pageMaxWidth?: number; // 360 to 720 px
+  capsuleSpacing?: number; // 6 to 32 px
 }
 
 export interface AnalyticsConfig {

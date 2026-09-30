@@ -10,7 +10,7 @@ import {
   Toggle,
   TextInput,
 } from "@/components/ui/FormControls";
-import { Palette, Plus, Trash2, Image as ImageIcon, Sparkles } from "lucide-react";
+import { Palette, Plus, Trash2, Image as ImageIcon, Sparkles, Sliders } from "lucide-react";
 import {
   BackgroundType,
   FontFamily,
@@ -298,17 +298,31 @@ export default function ThemePanel() {
         {theme.background.shapesEnabled && (
           <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06] space-y-3">
             <Select
-              label="Shape Style"
+              label="Shape Style (10 Types)"
               value={theme.background.shapesStyle || "blobs"}
               options={[
                 { value: "blobs", label: "Organic Glowing Blobs" },
-                { value: "geometric", label: "Floating Geometric Shapes" },
+                { value: "circles", label: "Floating Circles / Bubbles" },
+                { value: "squares", label: "Floating Squares / Cubes" },
+                { value: "diamonds", label: "Floating Diamonds / Rhombus" },
+                { value: "triangles", label: "Floating Geometric Triangles" },
+                { value: "stars", label: "Twinkling Night Stars" },
+                { value: "rings", label: "Concentric Cosmic Rings" },
+                { value: "geometric", label: "Geometric Polyhedra Mix" },
                 { value: "bokeh", label: "Drifting Bokeh Lights" },
                 { value: "grid", label: "Cyber Dot Matrix Grid" },
-                { value: "rings", label: "Concentric Cosmic Rings" },
-                { value: "stars", label: "Twinkling Night Stars" },
               ]}
               onChange={(v) => updateBackground("shapesStyle", v as ShapesStyle)}
+            />
+
+            <Slider
+              label="Shape Count (How Many Shapes)"
+              value={theme.background.shapesCount ?? 6}
+              min={1}
+              max={20}
+              step={1}
+              unit=" shapes"
+              onChange={(v) => updateBackground("shapesCount", v)}
             />
 
             <ColorPicker
@@ -333,11 +347,91 @@ export default function ThemePanel() {
                 { value: "slow", label: "Calm" },
                 { value: "normal", label: "Normal" },
                 { value: "fast", label: "Dynamic" },
+                { value: "static", label: "Static" },
               ]}
               onChange={(v) => updateBackground("shapesSpeed", v)}
             />
           </div>
         )}
+      </div>
+
+      {/* Page Layout, Padding & Margins */}
+      <div className="pt-3 border-t border-white/[0.06] space-y-3">
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-violet-400">
+          <Sliders className="w-3.5 h-3.5" />
+          <span>Page Layout, Padding & Margins</span>
+        </div>
+
+        <Slider
+          label="Top Page Padding"
+          value={theme.pagePaddingTop ?? 48}
+          min={12}
+          max={120}
+          step={4}
+          unit="px"
+          onChange={(v) => updateTheme("pagePaddingTop", v)}
+        />
+
+        <Slider
+          label="Bottom Page Padding"
+          value={theme.pagePaddingBottom ?? 48}
+          min={12}
+          max={120}
+          step={4}
+          unit="px"
+          onChange={(v) => updateTheme("pagePaddingBottom", v)}
+        />
+
+        <Slider
+          label="Side Margins / Horizontal Padding"
+          value={theme.pagePaddingX ?? 20}
+          min={8}
+          max={48}
+          step={2}
+          unit="px"
+          onChange={(v) => updateTheme("pagePaddingX", v)}
+        />
+
+        <Slider
+          label="Page Max Width"
+          value={theme.pageMaxWidth ?? 448}
+          min={340}
+          max={720}
+          step={10}
+          unit="px"
+          onChange={(v) => updateTheme("pageMaxWidth", v)}
+        />
+
+        <div className="flex gap-1">
+          {[
+            { label: "Compact", width: 380 },
+            { label: "Standard", width: 448 },
+            { label: "Wide", width: 540 },
+            { label: "Full", width: 640 },
+          ].map((preset) => (
+            <button
+              key={preset.width}
+              onClick={() => updateTheme("pageMaxWidth", preset.width)}
+              className={`flex-1 py-1 text-[10px] rounded-md border transition-all ${
+                (theme.pageMaxWidth ?? 448) === preset.width
+                  ? "border-violet-500/50 bg-violet-500/10 text-violet-300 font-semibold"
+                  : "border-white/[0.06] text-white/40 hover:text-white/60"
+              }`}
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
+
+        <Slider
+          label="Capsule Gap (Space Between Links)"
+          value={theme.capsuleSpacing ?? 12}
+          min={6}
+          max={32}
+          step={2}
+          unit="px"
+          onChange={(v) => updateTheme("capsuleSpacing", v)}
+        />
       </div>
 
       {/* Typography */}

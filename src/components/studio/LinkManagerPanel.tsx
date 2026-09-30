@@ -14,6 +14,7 @@ import {
   EyeOff,
   Tag,
   X,
+  Search,
 } from "lucide-react";
 import { BioLink } from "@/types/config";
 import { generateId } from "@/lib/utils";
@@ -32,6 +33,13 @@ export default function LinkManagerPanel() {
   const { config, updateConfig } = useConfig();
   const { links, analytics } = config;
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [iconSearch, setIconSearch] = useState("");
+
+  const filteredIcons = iconSearch.trim()
+    ? AVAILABLE_ICONS.filter((name) =>
+        name.toLowerCase().includes(iconSearch.toLowerCase().trim())
+      )
+    : AVAILABLE_ICONS;
 
   function updateLink(id: string, updates: Partial<BioLink>) {
     updateConfig((prev) => ({
@@ -192,25 +200,52 @@ export default function LinkManagerPanel() {
 
                   {/* Icon Selector */}
                   <div className="space-y-1.5">
-                    <label className="text-xs text-white/60 block">Icon</label>
-                    <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto p-1.5 rounded-lg bg-white/[0.02] border border-white/[0.05]">
-                      {AVAILABLE_ICONS.map((iconName) => {
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs text-white/60 block">
+                        Capsule Icon ({AVAILABLE_ICONS.length} available)
+                      </label>
+                      {link.icon && (
+                        <span className="text-[10px] text-violet-400 font-mono">
+                          Current: {link.icon}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="relative">
+                      <Search className="w-3.5 h-3.5 text-white/40 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <input
+                        type="text"
+                        placeholder="Search 90+ icons (e.g. music, shop, code, coffee, star)..."
+                        value={iconSearch}
+                        onChange={(e) => setIconSearch(e.target.value)}
+                        className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:border-violet-500/50"
+                      />
+                    </div>
+
+                    <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto p-2 rounded-lg bg-white/[0.02] border border-white/[0.05] scrollbar-thin">
+                      {filteredIcons.map((iconName) => {
                         const Icon = getLinkIcon(iconName);
+                        const isSelected = link.icon === iconName;
                         return (
                           <button
                             key={iconName}
                             onClick={() => updateLink(link.id, { icon: iconName })}
-                            className={`p-1.5 rounded-md transition-all ${
-                              link.icon === iconName
-                                ? "bg-violet-500/20 border border-violet-500/50 text-violet-300"
-                                : "border border-white/[0.06] text-white/40 hover:text-white/70 hover:border-white/20"
+                            className={`p-2 rounded-md transition-all flex items-center justify-center ${
+                              isSelected
+                                ? "bg-violet-500/25 border border-violet-500 text-violet-200 shadow-sm"
+                                : "border border-white/[0.06] text-white/50 hover:text-white hover:border-white/20 hover:bg-white/5"
                             }`}
                             title={iconName}
                           >
-                            <Icon className="w-3.5 h-3.5" />
+                            <Icon className="w-4 h-4" />
                           </button>
                         );
                       })}
+                      {filteredIcons.length === 0 && (
+                        <div className="w-full py-4 text-center text-xs text-white/40">
+                          No icons matching &quot;{iconSearch}&quot;
+                        </div>
+                      )}
                     </div>
                   </div>
 

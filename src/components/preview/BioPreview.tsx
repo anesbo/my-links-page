@@ -116,43 +116,24 @@ export default function BioPreview({ config, interactive = false }: BioPreviewPr
         break;
     }
 
-    // Custom Capsule Glow Calculation
-    if (linkStyle.glowEnabled !== false) {
-      const gRadius = linkStyle.glowRadius ?? 20;
-      const gSpread = linkStyle.glowSpread ?? 0;
-      const gOpacity = linkStyle.glowOpacity ?? 55;
-      const gColor = hexToRgba(linkStyle.glowColor || "#8b5cf6", gOpacity);
-      const glowShadow = `0 0 ${gRadius}px ${gSpread}px ${gColor}`;
-
-      if (
-        linkStyle.glowMode === "always" ||
-        linkStyle.glowMode === "both" ||
-        !linkStyle.glowMode
-      ) {
-        base.boxShadow =
-          base.boxShadow && base.boxShadow !== "none"
-            ? `${base.boxShadow}, ${glowShadow}`
-            : glowShadow;
-      }
-    }
-
     return base;
   }
 
-  function getHoverClass() {
+  function getHoverMotion() {
+    if (!interactive) return undefined;
     switch (linkStyle.hoverEffect) {
       case "lift":
-        return "hover:-translate-y-1 hover:shadow-xl hover:shadow-white/5";
+        return { y: -6, scale: 1.015, transition: { duration: 0.2, ease: "easeOut" as const } };
       case "scale":
-        return "hover:scale-[1.03]";
+        return { scale: 1.04, transition: { duration: 0.2, ease: "easeOut" as const } };
       case "glow":
-        return "hover:-translate-y-1";
+        return { y: -3, scale: 1.01, transition: { duration: 0.2, ease: "easeOut" as const } };
       case "shake":
-        return "hover:animate-[wiggle_0.3s_ease-in-out]";
+        return { x: [0, -4, 4, -3, 3, 0], transition: { duration: 0.35 } };
       case "shine":
-        return "hover:brightness-110";
+        return { y: -2, filter: "brightness(1.15)", transition: { duration: 0.2 } };
       default:
-        return "hover:-translate-y-1";
+        return { y: -4, transition: { duration: 0.2, ease: "easeOut" as const } };
     }
   }
 
@@ -216,80 +197,312 @@ export default function BioPreview({ config, interactive = false }: BioPreviewPr
     </div>
   );
 
-  // Decorative Shapes Overlay ("shapes and things")
+  // Decorative Shapes Overlay with customizable style and count
+  const shapesCount = Math.min(Math.max(theme.background.shapesCount ?? 6, 1), 20);
+  const shapesColor = theme.background.shapesColor || "#8b5cf6";
+  const shapesOpacity = (theme.background.shapesOpacity ?? 30) / 100;
+  const shapesSpeed = theme.background.shapesSpeed || "normal";
+  const speedFactor =
+    shapesSpeed === "slow"
+      ? 1.7
+      : shapesSpeed === "fast"
+      ? 0.55
+      : shapesSpeed === "static"
+      ? 0
+      : 1;
+
+  const dynamicShapes = Array.from({ length: shapesCount }, (_, i) => {
+    const top = 5 + ((i * 37 + 11) % 80);
+    const left = 5 + ((i * 43 + 17) % 82);
+    const delay = `${((i * 0.7) % 4).toFixed(1)}s`;
+    const baseDuration = 7 + (i % 5) * 2;
+    const duration = speedFactor > 0 ? `${(baseDuration * speedFactor).toFixed(1)}s` : "0s";
+    const isReverse = i % 2 === 1;
+    const size = 28 + ((i * 17) % 48);
+    return { id: i, top, left, delay, duration, isReverse, size };
+  });
+
   const shapesOverlay = theme.background.shapesEnabled && (
     <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
       {theme.background.shapesStyle === "blobs" && (
-        <>
-          <div
-            className="absolute -top-20 -left-20 w-80 h-80 rounded-full blur-3xl animate-[float-ambient_10s_ease-in-out_infinite]"
-            style={{
-              backgroundColor: theme.background.shapesColor || "#8b5cf6",
-              opacity: (theme.background.shapesOpacity ?? 30) / 100,
-            }}
-          />
-          <div
-            className="absolute top-1/2 -right-24 w-72 h-72 rounded-full blur-3xl animate-[float-reverse_12s_ease-in-out_infinite]"
-            style={{
-              backgroundColor: theme.background.shapesColor || "#8b5cf6",
-              opacity: (theme.background.shapesOpacity ?? 30) * 0.8 / 100,
-            }}
-          />
-          <div
-            className="absolute bottom-10 left-10 w-64 h-64 rounded-full blur-2xl animate-[float-ambient_8s_ease-in-out_infinite]"
-            style={{
-              backgroundColor: "#ec4899",
-              opacity: (theme.background.shapesOpacity ?? 30) * 0.6 / 100,
-            }}
-          />
-        </>
+        <div className="absolute inset-0" style={{ opacity: shapesOpacity }}>
+          {dynamicShapes.map((s) => {
+            const blobSize = 160 + ((s.id * 53) % 180);
+            return (
+              <div
+                key={s.id}
+                className={`absolute rounded-full blur-3xl ${
+                  speedFactor === 0
+                    ? ""
+                    : s.isReverse
+                    ? "animate-[float-reverse_12s_ease-in-out_infinite]"
+                    : "animate-[float-ambient_10s_ease-in-out_infinite]"
+                }`}
+                style={{
+                  top: `${s.top}%`,
+                  left: `${s.left}%`,
+                  width: `${blobSize}px`,
+                  height: `${blobSize}px`,
+                  backgroundColor:
+                    s.id % 3 === 0
+                      ? shapesColor
+                      : s.id % 3 === 1
+                      ? "#ec4899"
+                      : "#38bdf8",
+                  animationDelay: s.delay,
+                  animationDuration: s.duration,
+                }}
+              />
+            );
+          })}
+        </div>
+      )}
+
+      {theme.background.shapesStyle === "circles" && (
+        <div className="absolute inset-0" style={{ opacity: shapesOpacity }}>
+          {dynamicShapes.map((s) => (
+            <div
+              key={s.id}
+              className={`absolute rounded-full border-2 ${
+                speedFactor === 0
+                  ? ""
+                  : s.isReverse
+                  ? "animate-[float-reverse_9s_infinite_ease-in-out]"
+                  : "animate-[float-ambient_7s_infinite_ease-in-out]"
+              }`}
+              style={{
+                top: `${s.top}%`,
+                left: `${s.left}%`,
+                width: `${s.size}px`,
+                height: `${s.size}px`,
+                borderColor: shapesColor,
+                backgroundColor: `${shapesColor}15`,
+                animationDelay: s.delay,
+                animationDuration: s.duration,
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      {theme.background.shapesStyle === "squares" && (
+        <div className="absolute inset-0" style={{ opacity: shapesOpacity }}>
+          {dynamicShapes.map((s) => (
+            <div
+              key={s.id}
+              className={`absolute rounded-2xl border-2 ${
+                speedFactor === 0
+                  ? ""
+                  : s.isReverse
+                  ? "animate-[float-reverse_10s_infinite_ease-in-out]"
+                  : "animate-[float-ambient_8s_infinite_ease-in-out]"
+              }`}
+              style={{
+                top: `${s.top}%`,
+                left: `${s.left}%`,
+                width: `${s.size}px`,
+                height: `${s.size}px`,
+                borderColor: shapesColor,
+                backgroundColor: `${shapesColor}18`,
+                transform: `rotate(${s.id * 22}deg)`,
+                animationDelay: s.delay,
+                animationDuration: s.duration,
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      {theme.background.shapesStyle === "diamonds" && (
+        <div className="absolute inset-0" style={{ opacity: shapesOpacity }}>
+          {dynamicShapes.map((s) => (
+            <div
+              key={s.id}
+              className={`absolute border-2 rounded-lg rotate-45 ${
+                speedFactor === 0
+                  ? ""
+                  : s.isReverse
+                  ? "animate-[float-reverse_8s_infinite_ease-in-out]"
+                  : "animate-[float-ambient_7s_infinite_ease-in-out]"
+              }`}
+              style={{
+                top: `${s.top}%`,
+                left: `${s.left}%`,
+                width: `${s.size * 0.85}px`,
+                height: `${s.size * 0.85}px`,
+                borderColor: shapesColor,
+                backgroundColor: `${shapesColor}20`,
+                animationDelay: s.delay,
+                animationDuration: s.duration,
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      {theme.background.shapesStyle === "triangles" && (
+        <div className="absolute inset-0" style={{ opacity: shapesOpacity }}>
+          {dynamicShapes.map((s) => (
+            <div
+              key={s.id}
+              className={`absolute ${
+                speedFactor === 0
+                  ? ""
+                  : s.isReverse
+                  ? "animate-[float-reverse_9s_infinite_ease-in-out]"
+                  : "animate-[float-ambient_8s_infinite_ease-in-out]"
+              }`}
+              style={{
+                top: `${s.top}%`,
+                left: `${s.left}%`,
+                width: `${s.size}px`,
+                height: `${s.size}px`,
+                animationDelay: s.delay,
+                animationDuration: s.duration,
+              }}
+            >
+              <svg viewBox="0 0 100 100" className="w-full h-full">
+                <polygon
+                  points="50,15 90,85 10,85"
+                  fill={`${shapesColor}22`}
+                  stroke={shapesColor}
+                  strokeWidth="6"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+          ))}
+        </div>
       )}
 
       {theme.background.shapesStyle === "geometric" && (
-        <div
-          className="absolute inset-0"
-          style={{ opacity: (theme.background.shapesOpacity ?? 30) / 100 }}
-        >
-          <div
-            className="absolute top-16 left-8 w-24 h-24 border-2 rounded-2xl animate-[float-ambient_7s_infinite_ease-in-out]"
-            style={{ borderColor: theme.background.shapesColor || "#8b5cf6" }}
-          />
-          <div
-            className="absolute top-1/3 right-10 w-16 h-16 border-2 rotate-45 animate-[float-reverse_9s_infinite_ease-in-out]"
-            style={{ borderColor: theme.background.shapesColor || "#8b5cf6" }}
-          />
-          <div
-            className="absolute bottom-32 left-12 w-28 h-28 border rounded-full animate-[spin-slow_20s_linear_infinite]"
-            style={{ borderColor: theme.background.shapesColor || "#8b5cf6" }}
-          />
+        <div className="absolute inset-0" style={{ opacity: shapesOpacity }}>
+          {dynamicShapes.map((s) => {
+            const kind = s.id % 4;
+            return (
+              <div
+                key={s.id}
+                className={`absolute ${
+                  speedFactor === 0
+                    ? ""
+                    : s.isReverse
+                    ? "animate-[float-reverse_9s_infinite_ease-in-out]"
+                    : "animate-[float-ambient_8s_infinite_ease-in-out]"
+                }`}
+                style={{
+                  top: `${s.top}%`,
+                  left: `${s.left}%`,
+                  width: `${s.size}px`,
+                  height: `${s.size}px`,
+                  animationDelay: s.delay,
+                  animationDuration: s.duration,
+                }}
+              >
+                {kind === 0 && (
+                  <div
+                    className="w-full h-full border-2 rounded-2xl"
+                    style={{ borderColor: shapesColor }}
+                  />
+                )}
+                {kind === 1 && (
+                  <div
+                    className="w-full h-full border-2 rotate-45 rounded-lg"
+                    style={{ borderColor: shapesColor }}
+                  />
+                )}
+                {kind === 2 && (
+                  <div
+                    className="w-full h-full border-2 rounded-full"
+                    style={{ borderColor: shapesColor }}
+                  />
+                )}
+                {kind === 3 && (
+                  <svg viewBox="0 0 100 100" className="w-full h-full">
+                    <polygon
+                      points="50,15 90,85 10,85"
+                      fill={`${shapesColor}20`}
+                      stroke={shapesColor}
+                      strokeWidth="6"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 
       {theme.background.shapesStyle === "bokeh" && (
-        <div
-          className="absolute inset-0"
-          style={{ opacity: (theme.background.shapesOpacity ?? 30) / 100 }}
-        >
-          {[
-            { top: "15%", left: "20%", size: "80px", delay: "0s" },
-            { top: "35%", right: "15%", size: "120px", delay: "1.5s" },
-            { top: "65%", left: "10%", size: "90px", delay: "3s" },
-            { top: "80%", right: "25%", size: "110px", delay: "2s" },
-          ].map((item, idx) => (
-            <div
-              key={idx}
-              className="absolute rounded-full blur-xl animate-pulse"
-              style={{
-                top: item.top,
-                left: item.left,
-                right: item.right,
-                width: item.size,
-                height: item.size,
-                backgroundColor: theme.background.shapesColor || "#8b5cf6",
-                animationDelay: item.delay,
-              }}
-            />
-          ))}
+        <div className="absolute inset-0" style={{ opacity: shapesOpacity }}>
+          {dynamicShapes.map((s) => {
+            const bokehSize = 60 + ((s.id * 31) % 80);
+            return (
+              <div
+                key={s.id}
+                className="absolute rounded-full blur-xl animate-pulse"
+                style={{
+                  top: `${s.top}%`,
+                  left: `${s.left}%`,
+                  width: `${bokehSize}px`,
+                  height: `${bokehSize}px`,
+                  backgroundColor: shapesColor,
+                  animationDelay: s.delay,
+                  animationDuration: s.duration,
+                }}
+              />
+            );
+          })}
+        </div>
+      )}
+
+      {theme.background.shapesStyle === "rings" && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ opacity: shapesOpacity }}>
+          {dynamicShapes.map((s) => {
+            const ringSize = 100 + ((s.id * 67) % 240);
+            return (
+              <div
+                key={s.id}
+                className={`absolute rounded-full border ${
+                  s.id % 2 === 0 ? "border-dashed" : "border-solid"
+                } ${speedFactor > 0 ? "animate-[spin-slow_35s_linear_infinite]" : ""}`}
+                style={{
+                  top: `${s.top}%`,
+                  left: `${s.left}%`,
+                  width: `${ringSize}px`,
+                  height: `${ringSize}px`,
+                  borderColor: shapesColor,
+                  animationDelay: s.delay,
+                }}
+              />
+            );
+          })}
+        </div>
+      )}
+
+      {theme.background.shapesStyle === "stars" && (
+        <div className="absolute inset-0" style={{ opacity: shapesOpacity }}>
+          {dynamicShapes.map((s) => {
+            const starSize = 12 + (s.id % 3) * 6;
+            return (
+              <div
+                key={s.id}
+                className="absolute animate-pulse"
+                style={{
+                  top: `${s.top}%`,
+                  left: `${s.left}%`,
+                  width: `${starSize}px`,
+                  height: `${starSize}px`,
+                  animationDelay: s.delay,
+                  animationDuration: s.duration,
+                }}
+              >
+                <svg viewBox="0 0 24 24" className="w-full h-full" fill={shapesColor}>
+                  <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z" />
+                </svg>
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -297,58 +510,13 @@ export default function BioPreview({ config, interactive = false }: BioPreviewPr
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, ${theme.background.shapesColor || "#8b5cf6"} 1px, transparent 0)`,
+            backgroundImage: `radial-gradient(circle at 1px 1px, ${shapesColor} 1.2px, transparent 0)`,
             backgroundSize: "28px 28px",
-            opacity: ((theme.background.shapesOpacity ?? 30) / 100) * 0.7,
-            maskImage: "radial-gradient(circle at center, black 40%, transparent 80%)",
-            WebkitMaskImage: "radial-gradient(circle at center, black 40%, transparent 80%)",
+            opacity: shapesOpacity * 0.75,
+            maskImage: "radial-gradient(circle at center, black 45%, transparent 85%)",
+            WebkitMaskImage: "radial-gradient(circle at center, black 45%, transparent 85%)",
           }}
         />
-      )}
-
-      {theme.background.shapesStyle === "rings" && (
-        <div
-          className="absolute inset-0 flex items-center justify-center pointer-events-none"
-          style={{ opacity: (theme.background.shapesOpacity ?? 30) / 100 }}
-        >
-          <div
-            className="w-[450px] h-[450px] rounded-full border border-dashed animate-[spin-slow_40s_linear_infinite]"
-            style={{ borderColor: theme.background.shapesColor || "#8b5cf6" }}
-          />
-          <div
-            className="absolute w-[300px] h-[300px] rounded-full border"
-            style={{ borderColor: theme.background.shapesColor || "#8b5cf6", opacity: 0.5 }}
-          />
-        </div>
-      )}
-
-      {theme.background.shapesStyle === "stars" && (
-        <div
-          className="absolute inset-0"
-          style={{ opacity: (theme.background.shapesOpacity ?? 30) / 100 }}
-        >
-          {[
-            { top: "10%", left: "25%", size: 3 },
-            { top: "20%", right: "20%", size: 4 },
-            { top: "45%", left: "15%", size: 3 },
-            { top: "60%", right: "12%", size: 4 },
-            { top: "75%", left: "30%", size: 2 },
-            { top: "85%", right: "35%", size: 3 },
-          ].map((s, idx) => (
-            <div
-              key={idx}
-              className="absolute rounded-full bg-white animate-pulse"
-              style={{
-                top: s.top,
-                left: s.left,
-                right: s.right,
-                width: `${s.size}px`,
-                height: `${s.size}px`,
-                boxShadow: `0 0 6px ${theme.background.shapesColor || "#ffffff"}`,
-              }}
-            />
-          ))}
-        </div>
       )}
     </div>
   );
@@ -409,9 +577,16 @@ export default function BioPreview({ config, interactive = false }: BioPreviewPr
       {shapesOverlay}
 
       <main
-        className="relative z-10 mx-auto w-full max-w-md px-5 py-12 flex-1 flex flex-col justify-between"
+        className="relative z-10 mx-auto w-full flex-1 flex flex-col justify-between"
         role="main"
         aria-label="Bio profile"
+        style={{
+          maxWidth: `${theme.pageMaxWidth ?? 448}px`,
+          paddingTop: `${theme.pagePaddingTop ?? 48}px`,
+          paddingBottom: `${theme.pagePaddingBottom ?? 48}px`,
+          paddingLeft: `${theme.pagePaddingX ?? 20}px`,
+          paddingRight: `${theme.pagePaddingX ?? 20}px`,
+        }}
       >
         <div>
           {/* Avatar Section */}
@@ -525,7 +700,11 @@ export default function BioPreview({ config, interactive = false }: BioPreviewPr
 
           {/* Links (Capsules) */}
           <motion.div
-            className="space-y-3"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: `${theme.capsuleSpacing ?? 12}px`,
+            }}
             variants={interactive ? container : undefined}
             initial="hidden"
             animate="show"
@@ -536,109 +715,147 @@ export default function BioPreview({ config, interactive = false }: BioPreviewPr
 
               const gRadius = linkStyle.glowRadius ?? 20;
               const gSpread = linkStyle.glowSpread ?? 0;
-              const gOpacity = Math.min((linkStyle.glowOpacity ?? 55) * 1.3, 100);
-              const hoverGlowColor = hexToRgba(linkStyle.glowColor || "#8b5cf6", gOpacity);
-              const hoverGlowShadow = `0 0 ${Math.round(gRadius * 1.4) + 6}px ${gSpread + 2}px ${hoverGlowColor}`;
-              const shouldHoverGlow =
+              const gOpacity = linkStyle.glowOpacity ?? 55;
+              const glowColorHex = linkStyle.glowColor || "#8b5cf6";
+              const alwaysGlowColor = hexToRgba(glowColorHex, gOpacity);
+              const hoverGlowColor = hexToRgba(glowColorHex, Math.min(gOpacity * 1.35, 100));
+
+              const isAlwaysGlow =
+                linkStyle.glowEnabled !== false &&
+                (linkStyle.glowMode === "always" ||
+                  linkStyle.glowMode === "both" ||
+                  !linkStyle.glowMode);
+
+              const isHoverGlow =
                 linkStyle.glowEnabled !== false &&
                 (linkStyle.glowMode === "hover" ||
                   linkStyle.glowMode === "both" ||
                   linkStyle.hoverEffect === "glow");
 
+              const alwaysGlowShadow = `0 0 ${gRadius}px ${gSpread}px ${alwaysGlowColor}`;
+              const hoverGlowShadow = `0 0 ${Math.round(gRadius * 1.4) + 6}px ${gSpread + 2}px ${hoverGlowColor}`;
+              const cornerRadiusStyle =
+                linkStyle.cornerRadius >= 9999 ? "9999px" : `${linkStyle.cornerRadius}px`;
+
               return (
-                <motion.a
-                  key={link.id}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  variants={interactive ? item : undefined}
-                  className={`group block w-full px-5 py-4 transform transition-all duration-300 relative overflow-hidden ${getHoverClass()} ${
-                    linkStyle.glowEnabled !== false && linkStyle.glowPulse
-                      ? "animate-[pulse-glow_3s_ease-in-out_infinite]"
-                      : ""
-                  }`}
-                  style={getLinkButtonStyle()}
-                  whileHover={
-                    interactive && shouldHoverGlow
-                      ? {
-                          boxShadow: `${getLinkButtonStyle().boxShadow ? `${getLinkButtonStyle().boxShadow}, ` : ""}${hoverGlowShadow}`,
-                        }
-                      : undefined
-                  }
-                  whileTap={interactive ? { scale: 0.98 } : undefined}
-                >
-                  {/* Apple Liquid glass top curved reflection sheen (stationary, no moving line) */}
-                  {isLiquidGlass && (
+                <div key={link.id} className="relative group w-full">
+                  {/* Always Glow Aura Layer */}
+                  {isAlwaysGlow && (
                     <div
-                      className="absolute top-0 left-0 right-0 h-1/2 pointer-events-none rounded-t-[inherit] transition-opacity duration-300"
+                      className={`absolute inset-0 pointer-events-none transition-all duration-300 ${
+                        linkStyle.glowPulse ? "animate-[pulse-glow_3s_ease-in-out_infinite]" : ""
+                      }`}
                       style={{
-                        background: `linear-gradient(180deg, rgba(255, 255, 255, ${(((linkStyle.glassGloss ?? 80) / 100) * 0.38).toFixed(2)}) 0%, rgba(255, 255, 255, ${(((linkStyle.glassGloss ?? 80) / 100) * 0.05).toFixed(2)}) 55%, transparent 100%)`,
+                        borderRadius: cornerRadiusStyle,
+                        boxShadow: alwaysGlowShadow,
+                        zIndex: 0,
                       }}
                     />
                   )}
 
-                  <div className="flex items-center gap-3 relative z-10">
-                    <LinkIcon
-                      className="w-5 h-5 shrink-0 transition-transform group-hover:scale-110"
-                      style={{ color: linkStyle.iconColor }}
+                  {/* Hover Glow Aura Layer (smooth opacity transition, never gets stuck!) */}
+                  {isHoverGlow && (
+                    <div
+                      className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      style={{
+                        borderRadius: cornerRadiusStyle,
+                        boxShadow: hoverGlowShadow,
+                        zIndex: 0,
+                      }}
                     />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span
-                          className="font-semibold truncate"
-                          style={{
-                            color: linkStyle.textColor,
-                            fontSize: `${0.9375 * fontSizeBase}rem`,
-                          }}
-                        >
-                          {link.title}
-                        </span>
-                        {link.badge && (
+                  )}
+
+                  <motion.a
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variants={interactive ? item : undefined}
+                    className="relative block w-full px-5 py-4 overflow-hidden"
+                    style={{
+                      ...getLinkButtonStyle(),
+                      zIndex: 1,
+                    }}
+                    whileHover={getHoverMotion()}
+                    whileTap={interactive ? { scale: 0.98 } : undefined}
+                  >
+                    {/* Apple Liquid glass top curved reflection sheen */}
+                    {isLiquidGlass && (
+                      <div
+                        className="absolute top-0 left-0 right-0 h-1/2 pointer-events-none rounded-t-[inherit] transition-opacity duration-300"
+                        style={{
+                          background: `linear-gradient(180deg, rgba(255, 255, 255, ${(((linkStyle.glassGloss ?? 80) / 100) * 0.38).toFixed(2)}) 0%, rgba(255, 255, 255, ${(((linkStyle.glassGloss ?? 80) / 100) * 0.05).toFixed(2)}) 55%, transparent 100%)`,
+                        }}
+                      />
+                    )}
+
+                    {/* Shine Hover Light Sweep */}
+                    {linkStyle.hoverEffect === "shine" && (
+                      <div className="absolute inset-0 -translate-x-full group-hover:translate-x-[250%] transition-transform duration-700 pointer-events-none bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12" />
+                    )}
+
+                    <div className="flex items-center gap-3 relative z-10">
+                      <LinkIcon
+                        className="w-5 h-5 shrink-0 transition-transform duration-200 group-hover:scale-110"
+                        style={{ color: linkStyle.iconColor }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <span
-                            className="shrink-0 text-[10px] font-bold tracking-wider px-2.5 py-0.5 rounded-full uppercase transition-transform group-hover:scale-105"
+                            className="font-semibold truncate"
                             style={{
-                              backgroundColor:
-                                link.badgeBgColor || `${link.badgeColor || "#a78bfa"}25`,
-                              color: link.badgeColor || "#ffffff",
-                              boxShadow:
-                                linkStyle.badgeStyle === "glow"
-                                  ? `0 0 10px ${link.badgeBgColor || link.badgeColor || "#a78bfa"}`
-                                  : undefined,
-                              border:
-                                linkStyle.badgeStyle === "outline"
-                                  ? `1px solid ${link.badgeColor || "#a78bfa"}`
-                                  : undefined,
+                              color: linkStyle.textColor,
+                              fontSize: `${0.9375 * fontSizeBase}rem`,
                             }}
                           >
-                            {link.badge}
+                            {link.title}
+                          </span>
+                          {link.badge && (
+                            <span
+                              className="shrink-0 text-[10px] font-bold tracking-wider px-2.5 py-0.5 rounded-full uppercase transition-transform duration-200 group-hover:scale-105"
+                              style={{
+                                backgroundColor:
+                                  link.badgeBgColor || `${link.badgeColor || "#a78bfa"}25`,
+                                color: link.badgeColor || "#ffffff",
+                                boxShadow:
+                                  linkStyle.badgeStyle === "glow"
+                                    ? `0 0 10px ${link.badgeBgColor || link.badgeColor || "#a78bfa"}`
+                                    : undefined,
+                                border:
+                                  linkStyle.badgeStyle === "outline"
+                                    ? `1px solid ${link.badgeColor || "#a78bfa"}`
+                                    : undefined,
+                              }}
+                            >
+                              {link.badge}
+                            </span>
+                          )}
+                        </div>
+                        {link.subtitle && (
+                          <p
+                            className="text-xs mt-0.5 truncate"
+                            style={{
+                              color: linkStyle.subtextColor,
+                              fontSize: `${0.75 * fontSizeBase}rem`,
+                            }}
+                          >
+                            {link.subtitle}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {analytics.showClickCounts && link.clicks > 0 && (
+                          <span
+                            className="flex items-center gap-1 text-[10px] opacity-60 backdrop-blur-sm px-1.5 py-0.5 rounded bg-black/20"
+                            style={{ color: linkStyle.subtextColor }}
+                          >
+                            <MousePointerClick className="w-3 h-3" />
+                            {link.clicks.toLocaleString()}
                           </span>
                         )}
                       </div>
-                      {link.subtitle && (
-                        <p
-                          className="text-xs mt-0.5 truncate"
-                          style={{
-                            color: linkStyle.subtextColor,
-                            fontSize: `${0.75 * fontSizeBase}rem`,
-                          }}
-                        >
-                          {link.subtitle}
-                        </p>
-                      )}
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      {analytics.showClickCounts && link.clicks > 0 && (
-                        <span
-                          className="flex items-center gap-1 text-[10px] opacity-60 backdrop-blur-sm px-1.5 py-0.5 rounded bg-black/20"
-                          style={{ color: linkStyle.subtextColor }}
-                        >
-                          <MousePointerClick className="w-3 h-3" />
-                          {link.clicks.toLocaleString()}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </motion.a>
+                  </motion.a>
+                </div>
               );
             })}
           </motion.div>
