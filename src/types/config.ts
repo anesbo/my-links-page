@@ -102,7 +102,7 @@ export interface LinkStyle {
   surfaceTreatment: SurfaceTreatment;
   surfaceColor: string;
   surfaceOpacity: number; // 0-100 for glass translucency
-  glassBlur?: number; // 4 to 50 px backdrop blur
+  glassBlur?: number; // 0 to 50 px backdrop blur
   glassGloss?: number; // 0 to 100% specular glass reflection & refraction
   hoverEffect: HoverEffect;
   textColor: string;

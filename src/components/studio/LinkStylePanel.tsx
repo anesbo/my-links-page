@@ -62,9 +62,9 @@ export default function LinkStylePanel() {
           <Slider
             label="Glass Blur Depth (Frosted Depth)"
             value={linkStyle.glassBlur ?? 28}
-            min={4}
+            min={0}
             max={50}
-            step={2}
+            step={1}
             unit="px"
             onChange={(v) => updateLinkStyle("glassBlur", v)}
           />
@@ -86,9 +86,9 @@ export default function LinkStylePanel() {
           <Slider
             label="Glass Blur Depth"
             value={linkStyle.glassBlur ?? 16}
-            min={4}
+            min={0}
             max={40}
-            step={2}
+            step={1}
             unit="px"
             onChange={(v) => updateLinkStyle("glassBlur", v)}
           />

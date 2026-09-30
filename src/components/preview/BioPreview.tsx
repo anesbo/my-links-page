@@ -72,8 +72,8 @@ export default function BioPreview({ config, interactive = false }: BioPreviewPr
           .padStart(2, "0");
         const blur = linkStyle.glassBlur ?? 16;
         base.backgroundColor = `${linkStyle.surfaceColor}${hexAlpha}`;
-        base.backdropFilter = `blur(${blur}px)`;
-        base.WebkitBackdropFilter = `blur(${blur}px)`;
+        base.backdropFilter = blur > 0 ? `blur(${blur}px)` : "none";
+        base.WebkitBackdropFilter = blur > 0 ? `blur(${blur}px)` : "none";
         break;
       }
       case "liquid-glass": {
@@ -87,8 +87,8 @@ export default function BioPreview({ config, interactive = false }: BioPreviewPr
         const saturate = 150 + Math.round(gloss * 70);
 
         base.backgroundColor = `${linkStyle.surfaceColor}${hexAlpha}`;
-        base.backdropFilter = `blur(${blur}px) saturate(${saturate}%) contrast(106%)`;
-        base.WebkitBackdropFilter = `blur(${blur}px) saturate(${saturate}%) contrast(106%)`;
+        base.backdropFilter = blur > 0 ? `blur(${blur}px) saturate(${saturate}%) contrast(106%)` : `saturate(${saturate}%) contrast(106%)`;
+        base.WebkitBackdropFilter = blur > 0 ? `blur(${blur}px) saturate(${saturate}%) contrast(106%)` : `saturate(${saturate}%) contrast(106%)`;
 
         // Apple glass double specular rim highlight & deep ambient refraction
         const specularInsetTop = `inset 0 1.5px 1.5px 0 rgba(255, 255, 255, ${(0.3 + gloss * 0.55).toFixed(2)})`;
